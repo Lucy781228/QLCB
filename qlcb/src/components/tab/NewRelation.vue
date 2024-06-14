@@ -1,5 +1,5 @@
 <template>
-    <NcModal v-if="modal" @close="closeModal" size="large">
+    <NcModal v-if="modal" @close="closeModal" size="large" :canClose="false">
         <div class="modal__content">
             <div class="grid-item full-width">
                 <h2 class="modal-title">{{ getTitle }}</h2>
@@ -15,9 +15,6 @@
                     </span>
                     <span class="validation-error" v-if="isEdit && !validation.requiredString(fullName)">
                         Không được để trống
-                    </span>
-                    <span class="validation-error" v-if="!validation.fullName(fullName)">
-                        Không chứa số hay ký tự đặc biệt
                     </span>
                 </div>
             </div>
@@ -64,15 +61,22 @@
                 </div>
             </div>
 
-            <NcButton :wide="true" type="secondary" @click="closeModal">
-                Hủy
-            </NcButton>
-            <NcButton v-if="isEdit" :wide="true" @click="updateRelation" type="primary" :disabled="!isFormValid">
-                Cập nhật
-            </NcButton>
-            <NcButton v-else :wide="true" @click="createRelation" type="primary" :disabled="!isFormValid">
-                Thêm
-            </NcButton>
+            <div class="grid-item full-width">
+                <div class="button_actions_container">
+                    <div class="button_actions">
+                        <NcButton type="secondary" @click="closeModal" class="button">
+                            Hủy
+                        </NcButton>
+                        <NcButton v-if="isEdit" @click="updateRelation" type="primary" :disabled="!isFormValid"
+                            class="button">
+                            Cập nhật
+                        </NcButton>
+                        <NcButton v-else @click="createRelation" type="primary" :disabled="!isFormValid" class="button">
+                            Thêm
+                        </NcButton>
+                    </div>
+                </div>
+            </div>
         </div>
     </NcModal>
 </template>
@@ -181,8 +185,7 @@ export default {
         },
 
         isFormValid() {
-            return this.validation.fullName(this.fullName) &&
-                this.validation.phone(this.phone) &&
+            return this.validation.phone(this.phone) &&
                 this.validation.requiredString(this.relationship);
         }
     },
@@ -252,7 +255,6 @@ export default {
                     qlcb_uid: this.qlcbUid,
                     relation_id: this.relationId
                 });
-                console.log(this.relationId)
 
                 showSuccess(t('qlcb', 'Cập nhật thành công'));
                 this.closeModal()
@@ -267,7 +269,7 @@ export default {
                 this.typesRelationship = response.data.types
                 let copyTypes = [...this.types];
                 copyTypes = copyTypes.filter(type => {
-                    const matchingType = this.typesRelationship.find(tr => tr.type == type.value);
+                    const matchingType = this.typesRelationship.find(tr => tr.relationship == type.value);
                     if (matchingType && type.is_single) {
                         return false;
                     }
@@ -339,5 +341,20 @@ input {
 
 ::v-deep .multiselect__tags:hover {
     border-color: #3287b5 !important;
+}
+
+.button_actions_container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.button_actions {
+    display: flex;
+    gap: 40px;
+}
+
+.button {
+    width: 150px;
 }
 </style>

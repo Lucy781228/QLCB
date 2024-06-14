@@ -4,7 +4,7 @@
             {{ computedSelectedOption ? computedSelectedOption.text : 'Select option' }}
         </div>
         <div class="dropdown-menu" v-if="showDropdown">
-            <div v-if="hideIcon" class="dropdown-item" @click.stop="openModalAdd">
+            <div class="dropdown-item" @click.stop="openModalAdd">
                 <div class="icon-container">
                     <Plus class="icon-inline" :size="20" />Add a new option
                 </div>
@@ -15,20 +15,20 @@
                 <Close v-if="allowDelete" class="icon-right" @click.stop="openModalDelete(option)" :size="20" />
             </div>
         </div>
-        <NcModal :show="deleteObject" @close="closeModal">
-            <div class="modal__content">
+        <NcModal :show="deleteObject" @close="closeModal" style="z-index: 11000;" :canClose="false">
+            <div class="modal__content_delete">
                 <h3>Bạn chắc chắn không?</h3>
-                <div class="modal__actions">
-                    <NcButton :wide="true" @click="closeModal" type="primary">
+                <div class="modal__actions_delete">
+                    <NcButton @click="closeModal" type="primary">
                         Hủy
                     </NcButton>
-                    <NcButton :wide="true" @click="onDeleteOption" type="secondary">
+                    <NcButton @click="onDeleteOption" type="secondary">
                         Xóa
                     </NcButton>
                 </div>
             </div>
         </NcModal>
-        <NcModal :show="addUnit" @close="closeModal">
+        <NcModal :show="addUnit" @close="closeModal" style="z-index: 11000;" :canClose="false">
             <div class="modal__content">
                 <h2>THÊM ĐƠN VỊ</h2>
                 <NcTextField label="Mã đơn vị" :value.sync="newValue.id" />
@@ -44,7 +44,7 @@
                 </div>
             </div>
         </NcModal>
-        <NcModal :show="addPosition" @close="closeModal">
+        <NcModal :show="addPosition" @close="closeModal" style="z-index: 11000;" :canClose="false">
             <div class="modal__content">
                 <h2>THÊM CHỨC VỤ</h2>
                 <NcTextField label="Mã chức vụ" :value.sync="newValue.id" />
@@ -60,7 +60,7 @@
                 </div>
             </div>
         </NcModal>
-        <NcModal :show="addDiploma" @close="closeModal" style="z-index: 11000;">
+        <NcModal :show="addDiploma" @close="closeModal" style="z-index: 11000;" :canClose="false">
             <div class="modal__content">
                 <h2>THÊM VĂN BẰNG</h2>
                 <NcTextField label="Mã văn bằng" :value.sync="newValue.id" />
@@ -97,11 +97,6 @@ export default {
         NcTextField
     },
     props: {
-        hideIcon: {
-            type: Boolean,
-            default: false
-        },
-
         optionsList: {
             type: Array,
             required: true
@@ -353,6 +348,18 @@ export default {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
+    margin-top: 20px;
+}
+
+.modal__content_delete {
+    margin: 20px;
+    text-align: center;
+}
+
+.modal__actions_delete {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
     margin-top: 20px;
 }
 

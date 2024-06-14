@@ -9,29 +9,18 @@
             </h1>
         </template>
         <template #action>
-            <NcButton ariaLabel="A" to="/hoso/newuser" type="primary">
+            <NcButton ariaLabel="A" to="/files/newuser" type="primary">
                 Thêm dữ liệu
             </NcButton>
         </template>
     </NcEmptyContent>
     <div v-else>
         <div class="table-actions">
-            <NcButton type="tertiary" ariaLabel="A" to="/hoso/newuser">
+            <NcButton type="tertiary" ariaLabel="A" to="/files/newuser">
                 <template #icon>
                     <Plus :size="20" />
                 </template>
             </NcButton>
-            <NcActions type="tertiary">
-                <NcActionCheckbox @uncheck="uncheckFilter(1)" @check="checkFilter(1)">Có quá trình công tác
-                </NcActionCheckbox>
-                <NcActionCheckbox @uncheck="uncheckFilter(2)" @check="checkFilter(2)">Có quá trình đào tạo
-                </NcActionCheckbox>
-                <NcActionCheckbox @uncheck="uncheckFilter(3)" @check="checkFilter(3)">Có khen thưởng</NcActionCheckbox>
-                <NcActionCheckbox @uncheck="uncheckFilter(4)" @check="checkFilter(4)">Có kỷ luật</NcActionCheckbox>
-                <template #icon>
-                    <FilterMenu :size="20" />
-                </template>
-            </NcActions>
             <NcButton type="tertiary" ariaLabel="B" @click="deleteUsers">
                 <template #icon>
                     <Delete :size="20" />
@@ -39,7 +28,7 @@
             </NcButton>
             <NcButton type="tertiary" ariaLabel="C" @click="exportExcel">
                 <template #icon>
-                    <Download :size="20" />
+                    <ArrowCollapseDown :size="20" />
                 </template>
             </NcButton>
         </div>
@@ -55,14 +44,14 @@
         ofLabel: 'trên',
     }">
         </vue-good-table>
-        <NcModal :show="modal" @close="closeModal">
+        <NcModal :show="modal" @close="closeModal" :canClose="false">
             <div class="modal__content">
                 <h3>Bạn chắc chắn không?</h3>
                 <div class="modal__actions">
-                    <NcButton :wide="true" @click="closeModal" type="primary">
+                    <NcButton @click="closeModal" type="primary">
                         Hủy
                     </NcButton>
-                    <NcButton :wide="true" @click="onDeleteUsers" type="secondary">
+                    <NcButton @click="onDeleteUsers" type="secondary">
                         Xóa
                     </NcButton>
                 </div>
@@ -78,8 +67,8 @@ import axios from "@nextcloud/axios";
 import { generateUrl } from '@nextcloud/router'
 import { NcButton, NcActions, NcActionCheckbox, NcActionButton, NcEmptyContent, NcModal, NcLoadingIcon } from "@nextcloud/vue";
 import Plus from 'vue-material-design-icons/Plus'
-import FilterMenu from 'vue-material-design-icons/FilterMenu'
-import Download from 'vue-material-design-icons/Download'
+import FilterVariant from 'vue-material-design-icons/FilterVariant'
+import ArrowCollapseDown from 'vue-material-design-icons/ArrowCollapseDown'
 import Delete from 'vue-material-design-icons/Delete'
 import { showError, showSuccess } from '@nextcloud/dialogs'
 import * as XLSX from 'xlsx';
@@ -88,10 +77,10 @@ export default {
     name: 'TableContent',
     components: {
         VueGoodTablePlugin,
-        FilterMenu,
+        FilterVariant,
         Plus,
         Delete,
-        Download,
+        ArrowCollapseDown,
         NcButton,
         NcActionButton,
         NcActionCheckbox,
@@ -230,41 +219,16 @@ export default {
             else this.selectedUsers = null
             console.log(selectedRows);
         },
-
-        checkFilter(value) {
-            if (!this.types.includes(value)) {
-                this.types.push(value);
-            }
-            this.getUsersByType()
-        },
-
-        uncheckFilter(value) {
-            this.types = this.types.filter(type => type !== value);
-            this.getUsersByType()
-        },
-
-        async getUsersByType() {
-            try {
-                if (this.types.length > 0) {
-                    const params = new URLSearchParams();
-                    this.types.forEach(type => params.append('types[]', type));
-
-                    const response = await axios.get(generateUrl('/apps/qlcb/filter'), { params });
-                    this.usersFilter = response.data.users;
-                    console.log(this.usersFilter)
-                } else {
-                    this.usersFilter = this.users
-                }
-            } catch (error) {
-                console.error('Error fetching filtered users:', error);
-            }
+        formatDateToDDMMYYYY(inputDate) {
+            const datePart = inputDate.split("-")
+            return `${datePart[2]}-${datePart[1]}-${datePart[0]}`
         },
 
         exportExcel() {
             const data = this.usersFilter.map((item) => {
                 return {
                     'Họ và tên': item.full_name,
-                    'Ngày sinh': item.date_of_birth,
+                    'Ngày sinh': this.formatDateToDDMMYYYY(item.date_of_birth),
                     'Giới tính': item.gender ? 'Nữ' : 'Nam',
                     'Đơn vị': item.unit_name,
                     'Chức vụ': item.position_name,
@@ -272,8 +236,15 @@ export default {
                     'Email': item.email
                 };
             });
+
             const workbook = XLSX.utils.book_new();
             const worksheet = XLSX.utils.json_to_sheet(data);
+
+            const colWidths = Object.keys(data[0]).map(key => {
+                return { wch: Math.max(...data.map(row => row[key] ? row[key].toString().length : 0), key.length) };
+            });
+
+            worksheet['!cols'] = colWidths;
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
 
             const filename = 'CanBo.xlsx';
@@ -291,14 +262,14 @@ export default {
 }
 
 .modal__content {
-    margin: 50px;
+    margin: 20px;
     text-align: center;
 }
 
 .modal__actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
     margin-top: 20px;
 }
 </style>

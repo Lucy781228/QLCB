@@ -159,6 +159,7 @@ class Version1000Date20240429192142 extends SimpleMigrationStep
 
             $table->setPrimaryKey(["qlcb_uid"]);
             $table->addUniqueIndex(["phone"], "unique_phone");
+            $table->addUniqueIndex(["id_number"], "unique_id_number");
             $table->addUniqueIndex(["email"], "unique_email");
             $table->addIndex(['position_id'], 'position_index');
             $table->addIndex(['unit_id'], 'unit_index');

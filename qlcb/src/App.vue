@@ -3,14 +3,19 @@
 	<NcContent v-else id="content" app-name="qlcb">
 		<NcAppNavigation>
 			<div class="nav">
-				<NcAppNavigationItem id="test" :exact="true" :title="t('qlcb', 'Quản lý hồ sơ')" to="/hoso">
+				<NcAppNavigationItem id="files" :exact="true" :title="t('qlcb', 'Quản lý hồ sơ')" to="/files">
 					<template #icon>
-						<BookOutline :size="20" />
+						<NoteMultiple :size="20" />
 					</template>
 				</NcAppNavigationItem>
-				<NcAppNavigationItem id="timkiem" :exact="true" :title="t('qlcb', 'Tìm kiếm')" to="/timkiem">
+				<NcAppNavigationItem id="search" :exact="true" :title="t('qlcb', 'Tìm kiếm')" to="/search">
 					<template #icon>
 						<Magnify :size="20" />
+					</template>
+				</NcAppNavigationItem>
+				<NcAppNavigationItem id="analyst" :exact="true" :title="t('qlcb', 'Thống kê và báo cáo')" to="/analyst">
+					<template #icon>
+						<Poll :size="20" />
 					</template>
 				</NcAppNavigationItem>
 			</div>
@@ -27,8 +32,9 @@ import { NcAppContent, NcActions, NcActionButton, NcButton } from "@nextcloud/vu
 import { NcAppNavigation, NcEmptyContent } from "@nextcloud/vue";
 import { NcAppNavigationItem } from "@nextcloud/vue";
 import { NcContent } from "@nextcloud/vue";
-import BookOutline from 'vue-material-design-icons/BookOutline'
+import NoteMultiple from 'vue-material-design-icons/NoteMultiple'
 import Magnify from 'vue-material-design-icons/Magnify'
+import Poll from 'vue-material-design-icons/Poll'
 import axios from "@nextcloud/axios";
 import { generateUrl } from '@nextcloud/router'
 import { showError, showSuccess } from '@nextcloud/dialogs'
@@ -40,12 +46,13 @@ export default {
 		NcAppNavigation,
 		NcAppNavigationItem,
 		NcContent,
-		BookOutline,
+		NoteMultiple,
 		Magnify,
 		NcActionButton,
 		NcActions,
 		NcButton,
-		NcEmptyContent
+		NcEmptyContent,
+		Poll
 	},
 
 	data() {

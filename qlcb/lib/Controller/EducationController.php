@@ -5,35 +5,25 @@ declare(strict_types=1);
 namespace OCA\QLCB\Controller;
 
 use OCP\IRequest;
-use OCP\IDBConnection;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 
-use OCP\IUserSession;
-use OCP\IGroupManager;
+use OCA\QLCB\Service\EducationService;
 
 class EducationController extends Controller
 {
-    private $db;
-
-    protected $userSession;
-
-    protected $groupManager;
+    private $educationService;
 
     public function __construct(
         $AppName,
         IRequest $request,
-        IDBConnection $db,
-        IUserSession $userSession,
-        IGroupManager $groupManager
+        EducationService $educationService,
     ) {
-        parent::__construct($AppName, $request, $userSession, $groupManager);
-        $this->db = $db;
-        $this->userSession = $userSession;
-        $this->groupManager = $groupManager;
+        parent::__construct($AppName, $request);
+        $this->educationService = $educationService;
     }
 
     /**
@@ -48,22 +38,7 @@ class EducationController extends Controller
         $specialization,
         $result
     ) {
-        $query = $this->db->getQueryBuilder();
-        $query
-            ->insert("qlcb_education")
-            ->values([
-                "qlcb_uid" => $query->createNamedParameter($qlcb_uid),
-                "diploma_id" => $query->createNamedParameter($diploma_id),
-                "start_date" => $query->createNamedParameter($start_date),
-                "end_date" => $query->createNamedParameter($end_date),
-                "training_unit" => $query->createNamedParameter($training_unit),
-                "specialization" => $query->createNamedParameter(
-                    $specialization
-                ),
-                "result" => $query->createNamedParameter($result),
-            ])
-            ->execute();
-
+        $this->educationService->createEducation($qlcb_uid, $diploma_id, $start_date, $end_date, $training_unit, $specialization, $result);
         return new JSONResponse(["status" => "success"]);
     }
 
@@ -72,20 +47,7 @@ class EducationController extends Controller
      */
     public function getEducations($qlcb_uid)
     {
-        $query = $this->db->getQueryBuilder();
-
-        $query
-            ->select("e.*", "d.*")
-            ->from("qlcb_education", "e")
-            ->leftJoin("e", "qlcb_diploma", "d", "e.diploma_id = d.diploma_id")
-            ->where(
-                $query
-                    ->expr()
-                    ->eq("e.qlcb_uid", $query->createNamedParameter($qlcb_uid))
-            );
-
-        $result = $query->execute();
-        $educations = $result->fetchAll();
+        $educations = $this->educationService->getEducations($qlcb_uid);
         return ["educations" => $educations];
     }
 
@@ -94,16 +56,7 @@ class EducationController extends Controller
      */
     public function getAllEducations()
     {
-        $query = $this->db->getQueryBuilder();
-
-        $query
-            ->select("e.*", "d.*", "u.full_name")
-            ->from("qlcb_education", "e")
-            ->leftJoin("e", "qlcb_diploma", "d", "e.diploma_id = d.diploma_id")
-            ->leftJoin("e", "qlcb_user", "u", "e.qlcb_uid = u.qlcb_uid");
-
-        $result = $query->execute();
-        $educations = $result->fetchAll();
+        $educations = $this->educationService->getAllEducations();
         return ["educations" => $educations];
     }
 
@@ -120,26 +73,7 @@ class EducationController extends Controller
         $result,
         $education_id
     ) {
-        $query = $this->db->prepare('UPDATE `oc_qlcb_education` SET 
-        `diploma_id` = COALESCE(?, `diploma_id`), 
-        `start_date` = COALESCE(?, `start_date`),
-        `end_date` = COALESCE(?, `end_date`),
-        `training_unit` = COALESCE(?, `training_unit`),
-        `specialization` = COALESCE(?, `specialization`),
-        `result` = COALESCE(?, `result`),
-        `qlcb_uid` = COALESCE(?, `qlcb_uid`)
-        WHERE `education_id` = ?');
-        $success = $query->execute([
-            $diploma_id,
-            $start_date,
-            $end_date,
-            $training_unit,
-            $specialization,
-            $result,
-            $qlcb_uid,
-            $education_id,
-        ]);
-
+        $this->educationService->updateEducation($qlcb_uid, $diploma_id, $start_date, $end_date, $training_unit, $specialization, $result, $education_id);
         return new JSONResponse(["status" => "success"]);
     }
 
@@ -148,19 +82,7 @@ class EducationController extends Controller
      */
     public function deleteEducation($education_id)
     {
-        $query = $this->db->getQueryBuilder();
-        $query
-            ->delete("qlcb_education")
-            ->where(
-                $query
-                    ->expr()
-                    ->eq(
-                        "education_id",
-                        $query->createNamedParameter($education_id)
-                    )
-            )
-            ->execute();
-
+        $this->educationService->deleteEducation($education_id);
         return new JSONResponse(["status" => "success"]);
     }
 }

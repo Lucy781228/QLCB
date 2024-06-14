@@ -4,17 +4,18 @@
       <div class="grid-item">
         <h2>THÔNG TIN CƠ QUAN</h2>
       </div>
+      <div class="grid-item">
+      </div>
 
       <div class="grid-item">
         <h2>THÔNG TIN CÁ NHÂN</h2>
       </div>
-
       <div class="grid-item">
       </div>
 
       <div class="grid-item">
         <label>Tên người dùng (*)</label>
-        <NcMultiselect ref="qlcb_uid" class="nc-select" v-model="user.qlcb_uid" id="qlcb_uid" :options="formatUsers"
+        <NcMultiselect ref="qlcb_uid" class="nc-select" v-model="user.qlcb_uid" id="qlcb_uid" :options="formatUsers" placeholder="Chọn một tùy chọn"
           label="userId" track-by="userId" :user-select="true">
           <template #singleLabel="{ option }">
             <NcListItemIcon v-bind="option" :title="option.userId" :avatar-size="24" :no-margin="true" />
@@ -28,26 +29,41 @@
       </div>
 
       <div class="grid-item">
+        <label>Ngày tham gia (*)</label>
+        <NcDatetimePicker ref="day_joined" format="DD/MM/YYYY" class="nc-picker" id="day_joined" :clearable="true" placeholder="Chọn một ngày"
+          v-model="user.day_joined" />
+        <div class="validation-error-container">
+          <span class="validation-error" v-if="touchedFields.day_joined && !validation.requiredObject(user.day_joined)">
+            {{ validationMessages['required'] }}
+          </span>
+          <span class="validation-error" v-else-if="touchedFields.date_of_birth && !isDayJoinedValid">
+            {{ validationMessages['day_joined'] }}
+          </span>
+        </div>
+      </div>
+
+      <div class="grid-item">
         <label>Họ và tên (*)</label>
         <input id="full_name" type="text" v-model="user.full_name" @blur="handleFieldFocus('full_name')" />
         <div class="validation-error-container">
           <span class="validation-error" v-if="touchedFields.full_name && !validation.requiredString(user.full_name)">
             {{ validationMessages['required'] }}
           </span>
-          <span class="validation-error" v-if="!validation.fullName(user.full_name)">
-            {{ validationMessages['full_name'] }}
-          </span>
         </div>
       </div>
 
       <div class="grid-item">
         <label>Ngày sinh (*)</label>
-        <NcDatetimePicker ref="date_of_birth" format="DD/MM/YYYY" class="nc-picker" id="date_of_birth"
+        <NcDatetimePicker ref="date_of_birth" format="DD/MM/YYYY" class="nc-picker" id="date_of_birth" :clearable="true" placeholder="Chọn một ngày"
           v-model="user.date_of_birth" />
         <div class="validation-error-container">
           <span class="validation-error"
             v-if="touchedFields.date_of_birth && !validation.requiredObject(user.date_of_birth)">
             {{ validationMessages['required'] }}
+          </span>
+          <span class="validation-error"
+            v-else-if="touchedFields.date_of_birth && !isDateOfBirthValid">
+            {{ validationMessages['date_of_birth'] }}
           </span>
         </div>
       </div>
@@ -65,8 +81,19 @@
       </div>
 
       <div class="grid-item">
+        <label>Đơn vị (*)</label>
+        <Multiselect ref="unit_id" id="unit_id" v-model="user.unit_id" :options-list="formatUnits" type="unit"
+          :id="user.unit_id" @blur="handleFieldFocus('unit_id')" />
+        <div class="validation-error-container">
+          <span class="validation-error" v-if="touchedFields.unit_id && !validation.requiredString(user.unit_id)">
+            {{ validationMessages['required'] }}
+          </span>
+        </div>
+      </div>
+
+      <div class="grid-item">
         <label>Giới tính (*)</label>
-        <NcMultiselect ref="gender" class="nc-select" id="gender" v-model="user.gender" :options="genders" label="text"
+        <NcMultiselect ref="gender" class="nc-select" id="gender" v-model="user.gender" :options="genders" label="text" placeholder="Chọn một tùy chọn"
           track-by="value" />
         <div class="validation-error-container">
           <span class="validation-error" v-if="touchedFields.gender && !validation.requiredObject(user.gender)">
@@ -89,12 +116,29 @@
       </div>
 
       <div class="grid-item">
-        <label>Đơn vị (*)</label>
-        <Multiselect ref="unit_id" id="unit_id" v-model="user.unit_id" :options-list="formatUnits" type="unit"
-          :id="user.unit_id" @blur="handleFieldFocus('unit_id')" />
+        <label>Hệ số lương (*)</label>
+        <input id="coefficients_salary" type="text" v-model="user.coefficients_salary"
+          @blur="handleFieldFocus('coefficients_salary')" />
         <div class="validation-error-container">
-          <span class="validation-error" v-if="touchedFields.unit_id && !validation.requiredString(user.unit_id)">
+          <span class="validation-error"
+            v-if="touchedFields.coefficients_salary && !validation.requiredString(user.coefficients_salary)">
             {{ validationMessages['required'] }}
+          </span>
+          <span class="validation-error" v-if="!validation.decimal(user.coefficients_salary)">
+            {{ validationMessages['decimal'] }}
+          </span>
+        </div>
+      </div>
+
+      <div class="grid-item">
+        <label>Bậc thuế (*)</label>
+        <input id="tax" type="text" v-model="user.tax" @blur="handleFieldFocus('tax')" />
+        <div class="validation-error-container">
+          <span class="validation-error" v-if="touchedFields.tax && !validation.requiredString(user.tax)">
+            {{ validationMessages['required'] }}
+          </span>
+          <span class="validation-error" v-if="!validation.number(user.tax)">
+            {{ validationMessages['number'] }}
           </span>
         </div>
       </div>
@@ -126,18 +170,9 @@
       </div>
 
       <div class="grid-item">
-        <label>Hệ số lương (*)</label>
-        <input id="coefficients_salary" type="text" v-model="user.coefficients_salary"
-          @blur="handleFieldFocus('coefficients_salary')" />
-        <div class="validation-error-container">
-          <span class="validation-error"
-            v-if="touchedFields.coefficients_salary && !validation.requiredString(user.coefficients_salary)">
-            {{ validationMessages['required'] }}
-          </span>
-          <span class="validation-error" v-if="!validation.decimal(user.coefficients_salary)">
-            {{ validationMessages['decimal'] }}
-          </span>
-        </div>
+      </div>
+
+      <div class="grid-item">
       </div>
 
       <div class="grid-item">
@@ -150,41 +185,29 @@
         </div>
       </div>
 
-
       <div class="grid-item">
         <label>Ngày vào Đảng</label>
-        <NcDatetimePicker format="DD/MM/YYYY" class="nc-picker" id="communist_party_joined"
+        <NcDatetimePicker format="DD/MM/YYYY" class="nc-picker" id="communist_party_joined" :clearable="true" placeholder="Chọn một ngày"
           v-model="user.communist_party_joined" />
-      </div>
-
-      <div class="grid-item">
-        <label>Bậc thuế (*)</label>
-        <input id="tax" type="text" v-model="user.tax" @blur="handleFieldFocus('tax')" />
         <div class="validation-error-container">
-          <span class="validation-error" v-if="touchedFields.tax && !validation.requiredString(user.tax)">
-            {{ validationMessages['required'] }}
-          </span>
-          <span class="validation-error" v-if="!validation.number(user.tax)">
-            {{ validationMessages['number'] }}
+          <span class="validation-error" v-if="!isCommunistPartyJoinedValid">
+            {{ validationMessages['communist_party_joined'] }}
           </span>
         </div>
       </div>
 
-      <div class="grid-item">
-      </div>
-
-      <div class="grid-item">
-      </div>
-
-      <div class="grid-item">
-        <div class="button_actions">
-          <NcButton :wide="true" to="/hoso" type="secondary">
-            Hủy
-          </NcButton>
-          <NcButton :wide="true" @click="createUser" type="primary">
-            Thêm
-          </NcButton>
+      <div class="grid-item full-width">
+        <div class="button_actions_container">
+          <div class="button_actions">
+            <NcButton to="/files" type="secondary" class="button">
+              Hủy
+            </NcButton>
+            <NcButton @click="createUser" type="primary" class="button" :disabled="!isFormValid">
+              Thêm
+            </NcButton>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -208,6 +231,9 @@ export default {
     NcButton
   },
   data() {
+    const today = new Date();
+    const minDate = new Date(today.getFullYear() - 60, today.getMonth(), today.getDate());
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
     return {
       touchedFields: {
         phone: false,
@@ -222,6 +248,7 @@ export default {
         coefficients_salary: false,
         tax: false,
         unit_id: false,
+        day_joined: false
       },
       user: {
         qlcb_uid: null,
@@ -237,6 +264,7 @@ export default {
         tax: "",
         communist_party_joined: null,
         unit_id: "",
+        day_joined: null
       },
       units: [],
       positions: [],
@@ -252,8 +280,13 @@ export default {
         'id_number': 'Gồm 9 hoặc 12 số',
         'full_name': 'Không chứa số hay ký tự đặc biệt',
         'number': 'Phải là số tự nhiên',
-        'decimal': 'Phải là số'
-      }
+        'decimal': 'Phải là số',
+        'date_of_birth': `Từ ${this.formatDateToDDMMYYYY(minDate)} đến ${this.formatDateToDDMMYYYY(maxDate)}`,
+        'day_joined': 'Phải sau ngày sinh',
+        'communist_party_joined': 'Phải sau ngày sinh'
+      },
+      minDate: minDate,
+      maxDate: maxDate,
     };
   },
 
@@ -285,9 +318,60 @@ export default {
     validation() {
       return validation;
     },
+    isFormValid() {
+      return (
+        this.validation.requiredObject(this.user.qlcb_uid) &&
+        this.validation.requiredObject(this.user.day_joined) &&
+        this.validation.requiredString(this.user.full_name) &&
+        this.validation.requiredObject(this.user.date_of_birth) &&
+        this.isDateOfBirthValid &&
+        this.validation.requiredString(this.user.position_id) &&
+        this.validation.requiredString(this.user.unit_id) &&
+        this.validation.requiredObject(this.user.gender) &&
+        this.validation.requiredString(this.user.phone) &&
+        this.validation.phone(this.user.phone) &&
+        this.validation.requiredString(this.user.coefficients_salary) &&
+        this.validation.decimal(this.user.coefficients_salary) &&
+        this.validation.requiredString(this.user.tax) &&
+        this.validation.number(this.user.tax) &&
+        this.validation.requiredString(this.user.email) &&
+        this.validation.email(this.user.email) &&
+        this.validation.requiredString(this.user.id_number) &&
+        this.validation.idNumber(this.user.id_number) &&
+        this.validation.requiredString(this.user.address) &&
+        this.isDayJoinedValid &&
+        this.isCommunistPartyJoinedValid
+      );
+    },
+
+    isDateOfBirthValid() {
+    if (!this.user.date_of_birth) return false;
+    const dateObj = new Date(this.user.date_of_birth);
+    return dateObj >= this.minDate && dateObj <= this.maxDate;
+  },
+
+  isDayJoinedValid() {
+    if (!this.user.day_joined || !this.user.date_of_birth) return true;
+    const dateObj = new Date(this.user.day_joined);
+    const dobObj = new Date(this.user.date_of_birth);
+    return dateObj > dobObj;
+  },
+
+  isCommunistPartyJoinedValid() {
+    if (!this.user.communist_party_joined || !this.user.date_of_birth) return true;
+    const dateObj = new Date(this.user.communist_party_joined);
+    const dobObj = new Date(this.user.date_of_birth);
+    return dateObj > dobObj;
+  },
   },
 
   methods: {
+    formatDateToDDMMYYYY(date) {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    },
 
     handleFieldFocus(fieldName) {
       this.touchedFields[fieldName] = true;
@@ -344,12 +428,18 @@ export default {
           tax: this.user.tax,
           communist_party_joined: this.user.communist_party_joined ? this.mysqlDateFormatter(this.user.communist_party_joined) : null,
           unit_id: this.user.unit_id,
-          day_joined: this.mysqlDateFormatter(new Date())
+          day_joined: this.mysqlDateFormatter(this.user.day_joined)
         });
         showSuccess(t('qlcb', 'Thêm thành công'));
         this.reset()
       } catch (e) {
-        console.error(e)
+        console.log(e)
+        if (e.response && e.response.data) {
+          showError(e.response.data.message);
+        } else {
+          console.error(e);
+          showError('Lỗi không xác định.');
+        }
       }
     },
 
@@ -365,31 +455,33 @@ export default {
     },
 
     reset() {
-      this.touchedFields.phone = false,
-        this.touchedFields.qlcb_uid = false,
-        this.touchedFields.full_name = false,
-        this.touchedFields.date_of_birth = false,
-        this.touchedFields.gender = false,
-        this.touchedFields.address = false,
-        this.touchedFields.id_number = false,
-        this.touchedFields.email = false,
-        this.touchedFields.position_id = false,
-        this.touchedFields.coefficients_salary = false,
-        this.touchedFields.tax = false,
-        this.touchedFields.unit_id = false,
-        this.user.qlcb_uid = null,
-        this.user.full_name = "",
-        this.user.date_of_birth = null,
-        this.user.gender = null,
-        this.user.phone = "",
-        this.user.address = "",
-        this.user.id_number = "",
-        this.user.email = "",
-        this.user.position_id = "",
-        this.user.coefficients_salary = "",
-        this.user.tax = "",
-        this.user.communist_party_joined = null,
-        this.user.unit_id = ""
+      this.touchedFields.phone = false
+      this.touchedFields.qlcb_uid = false
+      this.touchedFields.full_name = false
+      this.touchedFields.date_of_birth = false
+      this.touchedFields.gender = false
+      this.touchedFields.address = false
+      this.touchedFields.id_number = false
+      this.touchedFields.email = false
+      this.touchedFields.position_id = false
+      this.touchedFields.coefficients_salary = false
+      this.touchedFields.tax = false
+      this.touchedFields.unit_id = false
+      this.touchedFields.day_joined = false
+      this.user.qlcb_uid = null
+      this.user.full_name = ""
+      this.user.date_of_birth = null
+      this.user.gender = null
+      this.user.phone = ""
+      this.user.address = ""
+      this.user.id_number = ""
+      this.user.email = ""
+      this.user.position_id = ""
+      this.user.coefficients_salary = ""
+      this.user.tax = ""
+      this.user.communist_party_joined = null
+      this.user.unit_id = ""
+      this.user.day_joined = null
       this.getUnits()
       this.getPositions()
       this.getNCUsers()
@@ -403,6 +495,7 @@ export default {
     this.attachBlurListener(this.$refs.qlcb_uid, 'qlcb_uid');
     this.attachBlurListener(this.$refs.gender, 'gender');
     this.attachBlurListener(this.$refs.date_of_birth, 'date_of_birth');
+    this.attachBlurListener(this.$refs.day_joined, 'day_joined');
   },
 }
 </script>
@@ -418,11 +511,11 @@ export default {
 
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-column-gap: 100px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-column-gap: 40px;
   grid-row-gap: 25px;
-  padding: 20px;
-  width: 80%;
+  padding: 15px;
+  width: 100%;
   margin: auto;
 }
 
@@ -466,18 +559,26 @@ input {
   height: 44px !important;
 }
 
-.button_actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin-top: 20px;
-}
-
 .validation-error-container {
   height: 10px;
 }
 
-.grid-item:last-child {
+.button_actions_container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.button_actions {
+  display: flex;
+  gap: 40px;
+}
+
+.button {
+  width: 150px;
+}
+
+.full-width {
   grid-column: 1 / -1;
 }
 </style>

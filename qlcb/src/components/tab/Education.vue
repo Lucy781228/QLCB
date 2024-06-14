@@ -44,14 +44,14 @@
                 </span>
             </template>
         </vue-good-table>
-        <NcModal :show="modal" @close="closeModal">
+        <NcModal :show="modal" @close="closeModal" :canClose="false">
             <div class="modal__content">
                 <h3>Bạn chắc chắn không?</h3>
                 <div class="modal__actions">
-                    <NcButton :wide="true" @click="closeModal" type="primary">
+                    <NcButton @click="closeModal" type="primary">
                         Hủy
                     </NcButton>
-                    <NcButton :wide="true" @click="onDeleteEducations" type="secondary">
+                    <NcButton @click="onDeleteEducations" type="secondary">
                         Xóa
                     </NcButton>
                 </div>
@@ -249,14 +249,14 @@ export default {
 }
 
 .modal__content {
-    margin: 50px;
+    margin: 20px;
     text-align: center;
 }
 
 .modal__actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
     margin-top: 20px;
 }
 

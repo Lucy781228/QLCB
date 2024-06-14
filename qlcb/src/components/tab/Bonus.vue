@@ -12,7 +12,7 @@
                 </NcButton>
             </template>
         </NcEmptyContent>
-        <NewBonus :modal="isAdd" :qlcb-uid="userId" @close="stopModal" :bonus-type:="bonusType"/>
+        <NewBonus :modal="isAdd" :qlcb-uid="userId" @close="stopModal" :bonus-type="bonusType"/>
     </div>
     <div v-else>
         <div class="table-actions">
@@ -44,23 +44,23 @@
                 </span>
             </template>
         </vue-good-table>
-        <NcModal :show="modal" @close="closeModal">
+        <NcModal :show="modal" @close="closeModal" :canClose="false">
             <div class="modal__content">
                 <h3>Bạn chắc chắn không?</h3>
                 <div class="modal__actions">
-                    <NcButton :wide="true" @click="closeModal" type="primary">
+                    <NcButton @click="closeModal" type="primary">
                         Hủy
                     </NcButton>
-                    <NcButton :wide="true" @click="onDeleteBonuses" type="secondary">
+                    <NcButton @click="onDeleteBonuses" type="secondary">
                         Xóa
                     </NcButton>
                 </div>
             </div>
         </NcModal>
-        <NewBonus :modal="isAdd" :qlcb-uid="userId" @close="stopModal" :bonus-type:="bonusType"/>
+        <NewBonus :modal="isAdd" :qlcb-uid="userId" @close="stopModal" :bonus-type="bonusType"/>
         <NewBonus :modal="isEdit" :qlcb-uid="userId" @close="stopModal" :time="time" :reason="reason"
             :department-decision="departmentDecision" :number-decision="numberDecision" :form="form" :is-edit="true"
-            :bonus-id="bonusId" :bonus-type:="bonusType" />
+            :bonus-id="bonusId" :bonus-type="bonusType" />
     </div>
 </template>
 
@@ -204,7 +204,6 @@ export default {
                 let value = this.bonusType ? 1 : 0
                 const response = await axios.get(generateUrl(`/apps/qlcb/bonuses/${this.userId}/${value}`));
                 this.bonuses = response.data.bonuses
-                console.log(this.bonuses.length)
 
             } catch (e) {
                 console.error(e)
@@ -229,7 +228,6 @@ export default {
             if (selectedRows.length)
                 this.selectedBonuses = selectedRows
             else this.selectedBonuses = null
-            console.log(selectedRows);
         },
     }
 };
@@ -243,14 +241,14 @@ export default {
 }
 
 .modal__content {
-    margin: 50px;
+    margin: 20px;
     text-align: center;
 }
 
 .modal__actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
     margin-top: 20px;
 }
 

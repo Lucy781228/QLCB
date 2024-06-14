@@ -18,9 +18,16 @@ return [
 		#Page
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 
+		#Analyst
+		['name' => 'Analyst#countUsersByTime', 'url' => '/analyst/count_users_by_time', 'verb' => 'GET'],
+		['name' => 'Analyst#countUsersByUnit', 'url' => '/analyst/count_users_by_unit', 'verb' => 'GET'],
+		['name' => 'Analyst#countUsersByGender', 'url' => '/analyst/count_users_by_gender', 'verb' => 'GET'],
+		['name' => 'Analyst#countUsersByAge', 'url' => '/analyst/count_users_by_age', 'verb' => 'GET'],
+		['name' => 'Analyst#countEducationPerUnit', 'url' => '/analyst/count_education_per_unit', 'verb' => 'GET'],
+
+
 		#User
 		['name' => 'User#getAllUsers', 'url' => '/all_users', 'verb' => 'GET'],
-		['name' => 'User#getUsersByType', 'url' => '/filter', 'verb' => 'GET'],
 		['name' => 'User#getNCUsers', 'url' => '/nc_users', 'verb' => 'GET'],
 		['name' => 'User#createUser', 'url' => '/create_user', 'verb' => 'POST'],
 		['name' => 'User#getUser', 'url' => '/user/{qlcb_uid}', 'verb' => 'GET'],

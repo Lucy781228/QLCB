@@ -2,58 +2,39 @@
 namespace OCA\QLCB\Controller;
 
 use OCP\IRequest;
-use OCP\IDBConnection;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http;
+use OCA\QLCB\Service\DiplomaService;
 
-class DiplomaController  extends Controller{
-    private $db;
+class DiplomaController extends Controller {
+    private $diplomaService;
 
-    public function __construct($AppName, IRequest $request, IDBConnection $db) {
+    public function __construct($AppName, IRequest $request, DiplomaService $diplomaService) {
         parent::__construct($AppName, $request);
-        $this->db = $db;
+        $this->diplomaService = $diplomaService;
     }
-
 
     /**
      * @NoCSRFRequired
      */
     public function getAllDiplomas() {
-        $query = $this->db->getQueryBuilder();
-        $query->select('*')
-            ->from('qlcb_diploma');
-
-        $result = $query->execute();
-        $diplomas = $result->fetchAll();
-        return ['diplomas' => $diplomas];
+        $diplomas = $this->diplomaService->getAllDiplomas();
+        return new DataResponse(['diplomas' => $diplomas]);
     }
-	
 
     /**
      * @NoCSRFRequired
      */
     public function createDiploma($diploma_id, $diploma_name) {
-        $query = $this->db->getQueryBuilder();
-        $query->insert('qlcb_diploma')
-            ->values([
-                'diploma_id' => $query->createNamedParameter($diploma_id),
-                'diploma_name' => $query->createNamedParameter($diploma_name),
-            ])
-            ->execute();
+        $this->diplomaService->createDiploma($diploma_id, $diploma_name);
         return new DataResponse(['status' => 'success']);
     }
-
 
     /**
      * @NoCSRFRequired
      */
     public function deleteDiploma($diploma_id) {
-        $query = $this->db->getQueryBuilder();
-        $query->delete('qlcb_diploma')
-            ->where($query->expr()->eq('diploma_id', $query->createNamedParameter($diploma_id)))
-            ->execute();
+        $this->diplomaService->deleteDiploma($diploma_id);
         return new DataResponse(['status' => 'success']);
     }
 }

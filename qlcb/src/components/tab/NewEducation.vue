@@ -1,5 +1,5 @@
 <template>
-    <NcModal v-if="modal" @close="closeModal" size="large">
+    <NcModal v-if="modal" @close="closeModal" size="large" :canClose="false">
         <div class="modal__content">
             <div class="grid-item full-width">
                 <h2 class="modal-title">{{ getTitle }}</h2>
@@ -44,7 +44,7 @@
             <div class="grid-item">
                 <label>Văn bằng (*)</label>
                 <Multiselect id="diploma_id" v-model="diplomaId" :options-list="formatDiplomas" :id="diplomaId"
-                    type="diploma" @blur="handleFieldFocus('diploma_id')" />
+                    :allow-delete="isEdit" type="diploma" @blur="handleFieldFocus('diploma_id')" />
                 <div class="validation-error-container">
                     <span class="validation-error"
                         v-if="!isEdit && touchedFields.diploma_id && !validation.requiredString(diplomaId)">
@@ -100,15 +100,23 @@
                 </div>
             </div>
 
-            <NcButton :wide="true" type="secondary" @click="closeModal">
-                Hủy
-            </NcButton>
-            <NcButton v-if="isEdit" :wide="true" @click="updateEducation" type="primary" :disabled="!isFormValid">
-                Cập nhật
-            </NcButton>
-            <NcButton v-else :wide="true" @click="createEducation" type="primary" :disabled="!isFormValid">
-                Thêm
-            </NcButton>
+            <div class="grid-item full-width">
+                <div class="button_actions_container">
+                    <div class="button_actions">
+                        <NcButton type="secondary" @click="closeModal" class="button">
+                            Hủy
+                        </NcButton>
+                        <NcButton v-if="isEdit" @click="updateEducation" type="primary" :disabled="!isFormValid"
+                            class="button">
+                            Cập nhật
+                        </NcButton>
+                        <NcButton v-else @click="createEducation" type="primary" :disabled="!isFormValid"
+                            class="button">
+                            Thêm
+                        </NcButton>
+                    </div>
+                </div>
+            </div>
         </div>
     </NcModal>
 </template>
@@ -280,7 +288,7 @@ export default {
                 this.touchedFields.result = false,
                 this.touchedFields.specialization = false,
                 this.touchedFields.training_unit = false,
-                this.isValidDate = false,
+                this.isValidDate = true,
                 this.startDate = null,
                 this.endDate = null,
                 this.trainingUnit = "",
@@ -411,4 +419,18 @@ input {
     text-align: center;
 }
 
+.button_actions_container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.button_actions {
+    display: flex;
+    gap: 40px;
+}
+
+.button {
+    width: 150px;
+}
 </style>

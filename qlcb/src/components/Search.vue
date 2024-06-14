@@ -12,13 +12,13 @@
 
                 <div class="grid-item">
                     <label>Đơn vị</label>
-                    <Multiselect v-model="userSearch.unit_id" :options-list="formatUnits" type="unit"
+                    <Multiselect v-model="userSearch.unit_id" :options-list="formatUnits" type="unit" :id="userSearch.unit_id"
                         :allow-delete="false" />
                 </div>
 
                 <div class="grid-item">
                     <label>Chức vụ</label>
-                    <Multiselect v-model="userSearch.position_id" :options-list="formatPositions" type="position"
+                    <Multiselect v-model="userSearch.position_id" :options-list="formatPositions" type="position" :id="userSearch.position_id"
                         :allow-delete="false" />
                 </div>
 
@@ -92,6 +92,12 @@ export default {
         NcDatetimePicker,
         Result
     },
+    props: {
+        reset: {
+            type: Boolean,
+            required: true
+        },
+    },
     data() {
         return {
             options: [
@@ -139,12 +145,24 @@ export default {
 
         isEqual() {
             return this.value == 0
-        }
+        },
 
     },
     mounted() {
         this.getUnits()
         this.getPositions()
+    },
+
+    watch: {
+        reset: {
+            handler(newVal, oldVal) {
+                if (newVal == true) {
+                    this.stopSearch()
+                    this.reset = false
+                }
+            },
+            immediate: true
+        }
     },
 
     methods: {
@@ -194,7 +212,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .grid-container-first {
     height: 160px;
     display: grid;
@@ -253,5 +271,17 @@ input {
 
 .nc-select .multiselect__tags:hover {
     border-color: #3287b5 !important;
+}
+
+::v-deep .nc-picker {
+  width: 100% !important;
+}
+
+::v-deep .mx-input {
+    height: 44px !important;
+}
+
+::v-deep .mx-datepicker {
+    width: 100% !important;
 }
 </style>

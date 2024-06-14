@@ -1,5 +1,5 @@
 <template>
-    <div v-if="rows.length === 0">
+    <div v-if="users.length == 0">
         <NcEmptyContent>
             <template #title>
                 <h1 class="empty-content__title">
@@ -21,7 +21,7 @@
                     <ArrowLeft :size="20" />
                 </template>
             </NcButton>
-            <NcButton aria-label="Example text" type="tertiary">
+            <NcButton aria-label="Example text" type="tertiary" @click="exportExcel">
                 <template #icon>
                     <Download :size="20" />
                 </template>
@@ -47,11 +47,9 @@ import axios from "@nextcloud/axios";
 import { generateUrl } from '@nextcloud/router'
 import { showError, showSuccess } from '@nextcloud/dialogs'
 import { NcAppSidebar, NcAppSidebarTab, NcButton, NcEmptyContent } from "@nextcloud/vue";
-import Details from "./tab/Details.vue";
-import Education from "./tab/Education.vue";
-import Relation from "./tab/Relation.vue";
 import ArrowLeft from 'vue-material-design-icons/ArrowLeft.vue';
 import Download from 'vue-material-design-icons/Download.vue';
+import * as XLSX from 'xlsx';
 
 
 export default {
@@ -332,7 +330,6 @@ export default {
     },
 
     mounted() {
-        console.log(this.show)
 
     },
 
@@ -343,9 +340,6 @@ export default {
 
         formatGender(value) {
             return value === 0 ? 'Nam' : 'Nữ';
-        },
-        convertDate(dateString) {
-            return dateString.split("/").reverse().join("-");
         },
 
         setData() {
@@ -376,17 +370,14 @@ export default {
                 }
 
                 if (this.start) {
-                    let startDate = this.convertDate(this.start);
-                    array = array.filter(user => new Date(user.date_of_birth) >= new Date(startDate));
+                    array = array.filter(user => new Date(user.date_of_birth) >= new Date(this.start));
                 }
 
                 if (this.end) {
-                    let endDate = this.convertDate(this.end);
-                    array = array.filter(user => new Date(user.date_of_birth) <= new Date(endDate));
+                    array = array.filter(user => new Date(user.date_of_birth) <= new Date(this.end));
                 }
 
                 this.users = array;
-                console.log(this.users)
             } catch (e) {
                 console.error(e)
             }
@@ -398,21 +389,24 @@ export default {
                 let array = response.data.educations
 
                 if (this.start) {
-                    let startDate = this.convertDate(this.start);
-                    array = array.filter(user => new Date(user.start_date) >= new Date(startDate));
+                    array = array.filter(user => new Date(user.start_date) >= new Date(this.start));
                 }
 
                 if (this.end) {
-                    let endDate = this.convertDate(this.end);
-                    array = array.filter(user => new Date(user.end_date) <= new Date(endDate));
+                    array = array.filter(user => new Date(user.end_date) <= new Date(this.end));
                 }
 
                 this.users = array;
-                console.log(this.users)
             } catch (e) {
                 console.error(e)
             }
         },
+
+        formatDateToDDMMYYYY(inputDate) {
+            const datePart = inputDate.split("-")
+            return `${datePart[2]}-${datePart[1]}-${datePart[0]}`
+        },
+
 
         async getBusinesses() {
             try {
@@ -420,17 +414,14 @@ export default {
                 let array = response.data.businesses
 
                 if (this.start) {
-                    let startDate = this.convertDate(this.start);
-                    array = array.filter(user => new Date(user.start_date) >= new Date(startDate));
+                    array = array.filter(user => new Date(user.start_date) >= new Date(this.start));
                 }
 
                 if (this.end) {
-                    let endDate = this.convertDate(this.end);
-                    array = array.filter(user => new Date(user.end_date) <= new Date(endDate));
+                    array = array.filter(user => new Date(user.end_date) <= new Date(this.end));
                 }
 
                 this.users = array;
-                console.log(this.users)
             } catch (e) {
                 console.error(e)
             }
@@ -438,25 +429,93 @@ export default {
 
         async getBonuses() {
             try {
-                let type = this.selectedOption == 3 ? 1 :0
+                let type = this.selectedOption == 3 ? 1 : 0
                 const response = await axios.get(generateUrl(`apps/qlcb/all_bonuses+${type}`))
                 let array = response.data.bonuses
 
                 if (this.start) {
-                    let startDate = this.convertDate(this.start);
-                    array = array.filter(user => new Date(user.time) >= new Date(startDate));
+                    array = array.filter(user => new Date(user.time) >= new Date(this.start));
                 }
 
                 if (this.end) {
-                    let endDate = this.convertDate(this.end);
-                    array = array.filter(user => new Date(user.time) <= new Date(endDate));
+                    array = array.filter(user => new Date(user.time) <= new Date(this.end));
                 }
 
                 this.users = array;
-                console.log(this.users)
             } catch (e) {
                 console.error(e)
             }
+        },
+
+        exportExcel() {
+            const data = this.users.map((item) => {
+                switch (this.selectedOption) {
+                    case 0:
+
+                        return {
+                            'Họ và tên': item.full_name,
+                            'Ngày sinh': this.formatDateToDDMMYYYY(item.date_of_birth),
+                            'Giới tính': item.gender ? 'Nữ' : 'Nam',
+                            'Đơn vị': item.unit_name,
+                            'Chức vụ': item.position_name,
+                            'Tên người dùng': item.qlcb_uid,
+                            'Email': item.email
+                        };
+                        break;
+                    case 1:
+
+                        return {
+                            'Họ và tên': item.full_name,
+                            'Tên người dùng': item.qlcb_uid,
+                            'Ngày bắt đầu': this.formatDateToDDMMYYYY(item.start_date),
+                            'Ngày kết thúc': this.formatDateToDDMMYYYY(item.end_date),
+                            'Đơn vị': item.unit,
+                            'Chức vụ': item.position
+                        };
+                        break;
+
+                    case 2:
+
+                        return {
+                            'Họ và tên': item.full_name,
+                            'Tên người dùng': item.qlcb_uid,
+                            'Ngày bắt đầu': this.formatDateToDDMMYYYY(item.start_date),
+                            'Ngày kết thúc': this.formatDateToDDMMYYYY(item.end_date),
+                            'Chuyên ngành': item.specialization,
+                            'Văn bằng': item.diploma_name,
+                            'Đơn vị': item.training_unit,
+                            'Kết quả': item.result
+                        };
+                        break;
+
+                    case 3:
+
+                        return {
+                            'Họ và tên': item.full_name,
+                            'Tên người dùng': item.qlcb_uid,
+                            'Thời gian': this.formatDateToDDMMYYYY(item.time),
+                            'Hình thức': item.form,
+                            'Số quyết định': item.number_decision,
+                            'Cơ quan quyết định': item.department_decision,
+                            'Lý do': item.reason,
+                        };
+                        break;
+
+                }
+            });
+
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet(data);
+
+            const colWidths = Object.keys(data[0]).map(key => {
+                return { wch: Math.max(...data.map(row => row[key] ? row[key].toString().length : 0), key.length) };
+            });
+
+            worksheet['!cols'] = colWidths;
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+
+            const filename = 'KetQua.xlsx';
+            XLSX.writeFile(workbook, filename);
         },
     }
 }

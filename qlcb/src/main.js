@@ -8,11 +8,11 @@ import VueRouter from 'vue-router'
 import TableContent from './components/TableContent.vue'
 import Menu from './components/Menu.vue'
 import NewUser from './components/NewUser.vue'
-import vuetify from './plugins/vuetify';
 import VueGoodTablePlugin from 'vue-good-table';
 import 'vue-good-table/dist/vue-good-table.css';
 import Search from './components/Search.vue'
-
+import DataMenu from './components/data/DataMenu.vue'
+// import store from './store'
 
 Vue.use(VueGoodTablePlugin);
 Vue.use(VueRouter)
@@ -34,14 +34,17 @@ const router = new VueRouter({
   base: generateUrl('/apps/qlcb'),
   routes: [
     {
-      path: '/timkiem', component: Search
+      path: '/search', component: Search
     },
     {
-      path: '/hoso', component: TableContent
+      path: '/analyst', component: DataMenu
     },
-    { path: '/hoso/newuser', component: NewUser },
     {
-      path: '/hoso/:user_id',
+      path: '/files', component: TableContent
+    },
+    { path: '/files/newuser', component: NewUser },
+    {
+      path: '/files/:user_id',
       name: 'Details',
       component: Menu,
       props: true
@@ -49,15 +52,15 @@ const router = new VueRouter({
   ]
 })
 
-router.push('/hoso')
+router.push('/files')
 
 __webpack_public_path__ = generateFilePath(appName, '', 'js/')
 
 Vue.mixin({ methods: { t, n } })
 
 export default new Vue({
+	// store,
   router,
-  vuetify,
   el: '#content',
   render: h => h(App),
 })

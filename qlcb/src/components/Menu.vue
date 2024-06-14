@@ -1,6 +1,6 @@
 <template>
     <div id="sidebar_cover">
-        <NcAppSidebar class="sidebar" :title="user_id">
+        <NcAppSidebar class="sidebar">
             <NcAppSidebarTab name="Thông Tin Cán Bộ" id="details" order="1">
                 <Details :user-id="this.user_id"/>
             </NcAppSidebarTab>
@@ -11,10 +11,10 @@
                 <Education :user-id="this.user_id"/>
             </NcAppSidebarTab>
             <NcAppSidebarTab name="Quá Trình Khen Thưởng" id="bonus" order="4">
-                <Bonus :bonus-type="true" :user-id="this.user_id"/>
+                <Bonus :user-id="user_id"/>
             </NcAppSidebarTab>
             <NcAppSidebarTab name="Quá Trình Kỷ Luật" id="discipline" order="5">
-                <Bonus :bonus-type="false" :user-id="this.user_id"/>
+                <Bonus :bonus-type="false" :user-id="user_id"/>
             </NcAppSidebarTab>
             <NcAppSidebarTab name="Thân Nhân" id="relation" order="6">
                 <Relation :user-id="this.user_id"/>
@@ -58,6 +58,10 @@ export default {
 
 ::v-deep .app-sidebar__close {
     display: none !important;
+}
+
+::v-deep .app-sidebar-header {
+    height: 10px !important
 }
 
 #sidebar_cover {

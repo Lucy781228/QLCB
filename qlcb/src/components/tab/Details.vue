@@ -6,6 +6,9 @@
             </div>
 
             <div class="grid-item">
+            </div>
+
+            <div class="grid-item">
                 <h2>THÔNG TIN CÁ NHÂN</h2>
             </div>
 
@@ -22,7 +25,7 @@
                             <Close :size="20" />
                         </template>
                     </NcButton>
-                    <NcButton aria-label="Edit" type="primary" @click="submitEditting">
+                    <NcButton aria-label="Edit" type="primary" @click="submitEditting" :disabled="!isFormValid">
                         <template #icon>
                             <Check :size="20" />
                         </template>
@@ -38,15 +41,26 @@
             </div>
 
             <div class="grid-item">
+                <label>Ngày tham gia (*)</label>
+                <input v-if="!edit" class="input-disabled" type="text" v-model="getDayJoined" :disabled="true" />
+                <NcDatetimePicker v-else format="DD/MM/YYYY" class="nc-picker" id="day_joined" v-model="dayJoined" />
+                <div class="validation-error-container">
+                    <span class="validation-error" v-if="!validation.requiredObject(dayJoined)">
+                        {{ validationMessages['required'] }}
+                    </span>
+                    <span class="validation-error" v-else-if="!isDayJoinedValid">
+                        {{ validationMessages['day_joined'] }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid-item">
                 <label>Họ và tên (*)</label>
                 <input v-if="!edit" class="input-disabled" type="text" v-model="user.full_name" :disabled="true" />
                 <input v-else id="full_name" type="text" v-model="user.full_name" />
                 <div class="validation-error-container">
                     <span class="validation-error" v-if="!validation.requiredString(user.full_name)">
                         {{ validationMessages['required'] }}
-                    </span>
-                    <span class="validation-error" v-if="!validation.fullName(user.full_name)">
-                        {{ validationMessages['full_name'] }}
                     </span>
                 </div>
             </div>
@@ -60,6 +74,9 @@
                     <span class="validation-error" v-if="!validation.requiredObject(dateOfBirth)">
                         {{ validationMessages['required'] }}
                     </span>
+                    <span class="validation-error" v-else-if="!isDateOfBirthValid">
+                        {{ validationMessages['date_of_birth'] }}
+                    </span>
                 </div>
             </div>
 
@@ -68,6 +85,15 @@
                 <input v-if="!edit" class="input-disabled" type="text" v-model="getPositionName" :disabled="true" />
                 <Multiselect v-else id="position_id" v-model="user.position_id" :options-list="formatPositions"
                     :id="user.position_id" :allow-delete="false" type="position" />
+                <div class="validation-error-container">
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <label>Đơn vị (*)</label>
+                <input v-if="!edit" class="input-disabled" type="text" v-model="getUnitName" :disabled="true" />
+                <Multiselect v-else id="unit_id" :options-list="formatUnits" type="unit" v-model="user.unit_id"
+                    :id="user.unit_id" :allow-delete="false" />
                 <div class="validation-error-container">
                 </div>
             </div>
@@ -96,11 +122,31 @@
             </div>
 
             <div class="grid-item">
-                <label>Đơn vị (*)</label>
-                <input v-if="!edit" class="input-disabled" type="text" v-model="getUnitName" :disabled="true" />
-                <Multiselect v-else id="unit_id" :options-list="formatUnits" type="unit" v-model="user.unit_id"
-                    :id="user.unit_id" :allow-delete="false" />
+                <label>Hệ số lương (*)</label>
+                <input v-if="!edit" class="input-disabled" type="text" v-model="user.coefficients_salary"
+                    :disabled="true" />
+                <input v-else id="coefficients_salary" type="text" v-model="user.coefficients_salary" />
                 <div class="validation-error-container">
+                    <span class="validation-error" v-if="!validation.requiredString(user.coefficients_salary)">
+                        {{ validationMessages['required'] }}
+                    </span>
+                    <span class="validation-error" v-if="!validation.decimal(user.coefficients_salary)">
+                        {{ validationMessages['decimal'] }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <label>Bậc thuế (*)</label>
+                <input v-if="!edit" class="input-disabled" type="text" v-model="user.tax" :disabled="true" />
+                <input v-else id="tax" type="text" v-model="user.tax" />
+                <div class="validation-error-container">
+                    <span class="validation-error" v-if="!validation.requiredString(user.tax)">
+                        {{ validationMessages['required'] }}
+                    </span>
+                    <span class="validation-error" v-if="!validation.number(user.tax)">
+                        {{ validationMessages['number'] }}
+                    </span>
                 </div>
             </div>
 
@@ -131,20 +177,9 @@
                     </span>
                 </div>
             </div>
-
             <div class="grid-item">
-                <label>Hệ số lương (*)</label>
-                <input v-if="!edit" class="input-disabled" type="text" v-model="user.coefficients_salary"
-                    :disabled="true" />
-                <input v-else id="coefficients_salary" type="text" v-model="user.coefficients_salary" />
-                <div class="validation-error-container">
-                    <span class="validation-error" v-if="!validation.requiredString(user.coefficients_salary)">
-                        {{ validationMessages['required'] }}
-                    </span>
-                    <span class="validation-error" v-if="!validation.decimal(user.coefficients_salary)">
-                        {{ validationMessages['decimal'] }}
-                    </span>
-                </div>
+            </div>
+            <div class="grid-item">
             </div>
 
             <div class="grid-item">
@@ -164,21 +199,13 @@
                 <input v-if="!edit" class="input-disabled" type="text" v-model="getCommunity" :disabled="true" />
                 <NcDatetimePicker v-else format="DD/MM/YYYY" class="nc-picker" id="communist_party_joined"
                     v-model="communityJoined" />
-            </div>
-
-            <div class="grid-item">
-                <label>Bậc thuế (*)</label>
-                <input v-if="!edit" class="input-disabled" type="text" v-model="user.tax" :disabled="true" />
-                <input v-else id="tax" type="text" v-model="user.tax" />
                 <div class="validation-error-container">
-                    <span class="validation-error" v-if="!validation.requiredString(user.tax)">
-                        {{ validationMessages['required'] }}
-                    </span>
-                    <span class="validation-error" v-if="!validation.number(user.tax)">
-                        {{ validationMessages['number'] }}
+                    <span class="validation-error" v-if="!isCommunistPartyJoinedValid">
+                        {{ validationMessages['communist_party_joined'] }}
                     </span>
                 </div>
             </div>
+
         </div>
     </div>
 </template>
@@ -214,6 +241,9 @@ export default {
         }
     },
     data() {
+        const today = new Date();
+        const minDate = new Date(today.getFullYear() - 60, today.getMonth(), today.getDate());
+        const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
         return {
             user: null,
             initialUser: null,
@@ -230,13 +260,18 @@ export default {
                 'email': 'Phải là email',
                 'phone': 'Gồm 10 số',
                 'id_number': 'Gồm 9 hoặc 12 số',
-                'full_name': 'Không chứa số hay ký tự đặc biệt',
                 'number': 'Phải là số tự nhiên',
-                'decimal': 'Phải là số'
+                'decimal': 'Phải là số',
+                'date_of_birth': `Từ ${this.formatDate(minDate)} đến ${this.formatDate(maxDate)}`,
+                'day_joined': 'Phải sau ngày sinh',
+                'communist_party_joined': 'Phải sau ngày sinh'
             },
             selectedUser: null,
             dateOfBirth: null,
-            communityJoined: null
+            communityJoined: null,
+            dayJoined: null,
+            minDate: minDate,
+            maxDate: maxDate,
         };
     },
 
@@ -266,12 +301,12 @@ export default {
             });
         },
 
-        formatNcPickerDate() {
-            return new Date(this.user.date_of_birth + '')
-        },
-
         getDateOfBirth() {
             return this.formatDateToDDMMYYYY(this.user.date_of_birth)
+        },
+
+        getDayJoined() {
+            return this.formatDateToDDMMYYYY(this.user.day_joined)
         },
 
         getCommunity() {
@@ -295,9 +330,60 @@ export default {
         validation() {
             return validation;
         },
+
+        isDateOfBirthValid() {
+            if (!this.user.date_of_birth) return false;
+            const dateObj = new Date(this.user.date_of_birth);
+            return dateObj >= this.minDate && dateObj <= this.maxDate;
+        },
+
+        isDayJoinedValid() {
+            if (!this.user.day_joined || !this.user.date_of_birth) return true;
+            const dateObj = new Date(this.user.day_joined);
+            const dobObj = new Date(this.user.date_of_birth);
+            return dateObj > dobObj;
+        },
+
+        isCommunistPartyJoinedValid() {
+            if (!this.user.communist_party_joined || !this.user.date_of_birth) return true;
+            const dateObj = new Date(this.user.communist_party_joined);
+            const dobObj = new Date(this.user.date_of_birth);
+            return dateObj > dobObj;
+        },
+
+        isFormValid() {
+            return (
+                this.validation.requiredObject(this.user.day_joined) &&
+                this.validation.requiredString(this.user.full_name) &&
+                this.validation.requiredObject(this.user.date_of_birth) &&
+                this.isDateOfBirthValid &&
+                this.validation.requiredString(this.user.position_id) &&
+                this.validation.requiredString(this.user.unit_id) &&
+                this.validation.requiredObject(this.user.gender) &&
+                this.validation.requiredString(this.user.phone) &&
+                this.validation.phone(this.user.phone) &&
+                this.validation.requiredString(this.user.coefficients_salary) &&
+                this.validation.decimal(this.user.coefficients_salary) &&
+                this.validation.requiredString(this.user.tax) &&
+                this.validation.number(this.user.tax) &&
+                this.validation.requiredString(this.user.email) &&
+                this.validation.email(this.user.email) &&
+                this.validation.requiredString(this.user.id_number) &&
+                this.validation.idNumber(this.user.id_number) &&
+                this.validation.requiredString(this.user.address) &&
+                this.isDayJoinedValid &&
+                this.isCommunistPartyJoinedValid
+            );
+        },
     },
 
     methods: {
+        formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        },
         startEditting() {
             this.edit = true;
         },
@@ -371,7 +457,7 @@ export default {
                     tax: this.user.tax,
                     communist_party_joined: this.communityJoined ? this.mysqlDateFormatter(this.communityJoined) : null,
                     unit_id: this.user.unit_id,
-                    day_joined: null
+                    day_joined: this.mysqlDateFormatter(this.dayJoined)
                 });
                 this.edit = false
                 console.log(this.user)
@@ -379,6 +465,12 @@ export default {
                 showSuccess(t('qlcb', 'Cập nhật thành công'));
             } catch (e) {
                 console.error(e)
+                if (e.response && e.response.data) {
+                    showError(e.response.data.message);
+                } else {
+                    console.error(e);
+                    showError('Lỗi không xác định.');
+                }
             }
         },
 
@@ -386,7 +478,7 @@ export default {
             try {
                 const response = await axios.get(generateUrl(`/apps/qlcb/user/${this.userId}`));
                 this.user = response.data.user
-                this.user.tax = this.user.tax +''
+                this.user.tax = this.user.tax + ''
                 this.initialUser = JSON.parse(JSON.stringify(this.user));
                 this.selectedUser =
                 {
@@ -396,6 +488,7 @@ export default {
                 }
                 console.log(this.user)
                 this.dateOfBirth = new Date(this.user.date_of_birth + '')
+                this.dayJoined = new Date(this.user.day_joined + '')
                 this.communityJoined = this.user.communist_party_joined ? new Date(this.user.communist_party_joined + '') : null
             } catch (e) {
                 console.error(e)
@@ -419,15 +512,16 @@ export default {
     flex-direction: column;
     justify-content: center;
     height: 100%;
+    width: 100%
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-column-gap: 100px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-column-gap: 40px;
     grid-row-gap: 25px;
-    padding: 20px;
-    width: 80%;
+    padding: 15px;
+    width: 100%;
     margin: auto;
 }
 

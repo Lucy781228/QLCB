@@ -2,58 +2,41 @@
 namespace OCA\QLCB\Controller;
 
 use OCP\IRequest;
-use OCP\IDBConnection;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
+use OCA\QLCB\Service\PositionService;
 
-class PositionController  extends Controller{
-    private $db;
+class PositionController extends Controller {
+    private $positionService;
 
-    public function __construct($AppName, IRequest $request, IDBConnection $db) {
+    public function __construct($AppName, IRequest $request, PositionService $positionService) {
         parent::__construct($AppName, $request);
-        $this->db = $db;
+        $this->positionService = $positionService;
     }
-
 
     /**
      * @NoCSRFRequired
      */
     public function getAllPositions() {
-        $query = $this->db->getQueryBuilder();
-        $query->select('*')
-            ->from('qlcb_position');
-
-        $result = $query->execute();
-        $positions = $result->fetchAll();
+        $positions = $this->positionService->getAllPositions();
         return ['positions' => $positions];
     }
-	
 
     /**
      * @NoCSRFRequired
      */
     public function createPosition($position_id, $position_name) {
-        $query = $this->db->getQueryBuilder();
-        $query->insert('qlcb_position')
-            ->values([
-                'position_id' => $query->createNamedParameter($position_id),
-                'position_name' => $query->createNamedParameter($position_name),
-            ])
-            ->execute();
+        $this->positionService->createPosition($position_id, $position_name);
         return new DataResponse(['status' => 'success']);
     }
-
 
     /**
      * @NoCSRFRequired
      */
     public function deletePosition($position_id) {
-        $query = $this->db->getQueryBuilder();
-        $query->delete('qlcb_position')
-            ->where($query->expr()->eq('position_id', $query->createNamedParameter($position_id)))
-            ->execute();
+        $this->positionService->deletePosition($position_id);
         return new DataResponse(['status' => 'success']);
     }
 }

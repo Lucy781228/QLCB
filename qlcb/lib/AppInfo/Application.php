@@ -19,8 +19,6 @@ class Application extends App {
 	}
 
 	public function register(IRegistrationContext $context): void {
-        $context->registerController(PageController::class);
-        $context->registerController(KMAUserController::class);
         // Register other controllers here
     }
 	
